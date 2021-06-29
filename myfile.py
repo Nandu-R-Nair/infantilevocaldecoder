@@ -26,6 +26,7 @@ from pydub.utils import make_chunks
 from collections import Counter
 
 app = Flask(__name__)
+app.secret_key = "super secret key"
 model = pickle.load(open('myRandomForest.pkl', 'rb'))
 
 UPLOAD_FOLDER = 'C:/Users/91902/infantilevocaldecoder/tmp'
@@ -57,14 +58,15 @@ def upload_file():
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
+            return render_template('extra.html')
+            #return redirect(request.url)
         file = request.files['file']
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
         if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
+            return render_template('extra.html')
+            #flash('No selected file')
+            #return redirect(request.url)
         if file and allowed_file(file.filename):
 
             
@@ -72,11 +74,9 @@ def upload_file():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             os.rename(UPLOAD_FOLDER +'/' + filename, UPLOAD_FOLDER+ '/' + 'output.wav')
             #return 'file uploaded successfully'
-        '''out='C:/Users/91902/infantilevocaldecoder/audio/'
-        outpath='C:/Users/91902/infantilevocaldecoder/tmp'
-        name= os.path.basename(outpath)
-        inpath='C:/Users/91902/infantilevocaldecoder/tmp/' + name'''
-        dir = 'C:/Users/91902/infantilevocaldecoder/tmp/'
+        else:
+            return render_template('extra.html')
+
         for f in os.listdir(dir):
             full_path = os.path.join(dir, f)
         sound = AudioSegment.from_mp3(full_path)
@@ -107,9 +107,18 @@ def upload_file():
         data2=data.most_common(1)
         result=data2[0]
         result2=result[0]
+        if (result2=='hungry'):
+            #dataToRender= 'is Hungry'
+            return render_template('result.html',dataToRender='is Hungry')
+        if (result2=='pain'):
+            #dataToRender= 'is Hungry'
+            return render_template('result.html',dataToRender='is in pain')
+        else:
+            #dataToRender= 'is Hungry'
+            return render_template('result.html',dataToRender='is in discomfort')
 
         
-        return render_template('result.html',dataToRender=result2)
+        
         #return result2
 def chop_song(filename, folder):
     #print(filename)
